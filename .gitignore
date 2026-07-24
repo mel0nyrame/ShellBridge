@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+*.db
+*.db-shm
+*.db-wal
+.env
+gateway.env
+shellbridge.env
+test-results/
+
+/bug/
