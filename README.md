@@ -1,130 +1,399 @@
 # ShellBridge
 
-ShellBridge gives ChatGPT fast, safe, and auditable visibility into a Linux VPS through MCP. General shell diagnostics run inside a read-only, network-isolated Bubblewrap sandbox. Persistent changes are limited to explicit document, local Git, and pre-existing script capabilities, with local kill switches and immutable execution proposals.
+[![CI](https://github.com/fengyincheng/ShellBridge/actions/workflows/ci.yml/badge.svg)](https://github.com/fengyincheng/ShellBridge/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Ubuntu%2024.04%20x86__64-lightgrey.svg)](#supported-platform)
 
-> **v0.3.0 Public Preview:** ShellBridge is not production-ready. It does not replace a dedicated VPS, virtual machine, container boundary, low-privilege account, HTTPS, or ordinary host hardening.
+## Let ChatGPT see your VPS — without giving it SSH.
 
-## Why not expose SSH?
+**Say goodbye to “copy this command into your VPS and send me the output.”**
 
-An SSH session usually gives its caller a broad interactive authority. ShellBridge instead exposes narrow, auditable MCP tools:
+ShellBridge connects ordinary ChatGPT conversations to your Linux VPS through MCP. It gives ChatGPT enough current, controlled, and auditable information to investigate your server, explain what is happening, and write plans grounded in the system that actually exists.
 
-- general Bash diagnostics run as an unprivileged identity in a read-only mount view;
-- network and Unix socket creation are blocked with namespaces and seccomp;
-- selected configuration fields can be inspected only through registered, redacting readers;
-- persistent operations are separate capabilities, disabled by default;
-- consequential script and Git commit operations freeze their exact inputs before execution.
+Ask ChatGPT things like:
 
-The service remains high-privilege infrastructure because a root-managed process constructs these boundaries and controls host paths.
+- “What is using all the disk space?”
+- “Why is this project failing its tests?”
+- “What changed in this Git repository?”
+- “Check whether this configuration is complete without revealing its secrets.”
+- “Review the current implementation and write a detailed plan for Codex.”
+- “Inspect the result after Codex finishes and tell me whether it is safe to commit.”
+
+General diagnostics run inside a read-only, network-isolated sandbox. Sensitive paths are hidden automatically. Persistent capabilities are narrow, disabled by default, and separately controlled by the server owner.
+
+> **Public Preview · v0.3.0**
+>
+> Ubuntu 24.04 · Linux x86_64 · Node.js 22+
+
+---
+
+## Why use ShellBridge?
+
+### 1. Give ChatGPT enough information to write a genuinely useful plan
+
+ChatGPT is especially useful for conversation, synthesis, explanation, and long-form writing. It can turn a complicated technical situation into an architecture review, troubleshooting guide, migration plan, implementation brief, or precise handoff for another developer.
+
+But good plans require good context.
+
+Without access to the VPS, ChatGPT only knows the fragments you remember to paste into the conversation. Important files, repository state, test results, logs, and configuration details are easily missed.
+
+ShellBridge lets ChatGPT inspect the relevant evidence directly. When the information is complete, the resulting plan can be specific to your real system rather than a generic checklist.
+
+That plan can then be reviewed by you and handed to Codex, ChatGPT Work, another coding agent, or a human developer.
+
+### 2. Stop being a human copy-and-paste bridge
+
+Without ShellBridge, a technical conversation often becomes:
+
+```text
+ChatGPT gives you a command
+        ↓
+You copy it into SSH
+        ↓
+You copy the output back
+        ↓
+ChatGPT asks for another command
+        ↓
+Repeat
+```
+
+This is slow and surprisingly error-prone. Output gets truncated, commands run in the wrong directory, context is lost between messages, and the user becomes a manual transport layer between two windows.
+
+ShellBridge removes that repetitive relay. ChatGPT can perform a read-only check, inspect the result, follow up with another diagnostic, and keep the investigation inside one conversation.
+
+You stay in control without spending the conversation moving text around by hand.
+
+### 3. Use Chat for understanding — save Codex and Work for execution
+
+ShellBridge does **not** try to replace Codex.
+
+Use ChatGPT Chat with ShellBridge to:
+
+- inspect the real state of a VPS;
+- discuss a problem interactively;
+- combine files, logs, tests, and repository state;
+- explain unfamiliar systems in plain language;
+- compare possible approaches;
+- write detailed implementation plans;
+- prepare exact handoff instructions;
+- review completed work.
+
+Then use Codex or ChatGPT Work when the task genuinely needs sustained execution, broad file edits, or autonomous implementation.
+
+OpenAI’s current documentation places Codex and ChatGPT Work in the same agentic usage pool, while Chat remains the separate conversational experience. ShellBridge lets you use ordinary Chat for investigation, explanation, and long-form planning while saving the shared Codex/Work allowance for execution-heavy tasks. Usage policies can change, so check [ChatGPT Work and Codex](https://help.openai.com/en/articles/20001275-chatgpt-work-and-codex) and the [current Codex usage documentation](https://help.openai.com/en/articles/11369540) for your plan.
+
+```text
+ChatGPT Chat + ShellBridge
+    inspect, understand, discuss, and write the plan
+                        ↓
+Codex or ChatGPT Work
+    perform the implementation
+                        ↓
+ChatGPT Chat + ShellBridge
+    inspect and review the result
+```
+
+---
+
+## Does ShellBridge turn ChatGPT into another Codex?
+
+**No — and that is not the goal.**
+
+Codex is an execution-focused coding agent. It is designed to enter a workspace, edit files, run commands, and complete implementation tasks.
+
+ShellBridge gives ChatGPT something different: enough safe, current, and structured information to understand what is happening on your VPS.
+
+ChatGPT remains a conversational model. ShellBridge does not grant it unrestricted workspace control, turn it into an autonomous coding agent, or provide a general-purpose remote shell.
+
+Instead, ShellBridge connects the reasoning and planning layer to reality:
+
+```text
+ShellBridge provides visibility, not unrestricted authority.
+ChatGPT investigates and plans.
+Codex or Work implements.
+You remain in control.
+```
+
+---
+
+## Why not just expose SSH?
+
+An ordinary SSH session gives its caller broad, interactive authority. Most diagnostic questions do not need that much power.
+
+ShellBridge exposes narrow MCP tools instead:
 
 ```text
 ChatGPT
-   │  HTTPS + OAuth/Bearer
+   │
+   │  HTTPS + OAuth
    ▼
-reverse proxy or authenticated tunnel
-   │  loopback only
+ShellBridge
+   │
+   ├── read-only diagnostic sandbox
+   ├── sensitive-path masking
+   ├── output redaction
+   ├── time and resource limits
+   └── optional, narrowly scoped write tools
+   │
    ▼
-ShellBridge 127.0.0.1:8765
-   ├─ read-only Bubblewrap + seccomp + cgroup
-   ├─ registered redacted configuration reads
-   └─ locally enabled document/Git/script capabilities
+Your VPS
 ```
 
-## Current capabilities
+ChatGPT gets enough visibility to investigate effectively without receiving unrestricted SSH access.
 
-- Streamable HTTP MCP with Bearer authentication and single-owner OAuth.
-- Full Bash syntax for diagnostics inside a read-only Bubblewrap view.
-- Exact sensitive-path masking, output redaction, timeouts, output limits, rlimits, and cgroup controls.
-- Registered configuration selectors with mandatory secret redaction.
-- Existing project tasks in a disposable writable copy with no network access.
-- Restricted Markdown/TXT writes under the configured operation root.
-- Local-only Git status, stage, unstage, and immutable commit proposals.
-- Immutable proposals for pre-existing side-effecting scripts, with expiry and replay prevention.
+The service is still security-sensitive infrastructure: a root-managed process constructs these boundaries and controls which host paths are visible. Read the [threat model](docs/threat-model.md) before deployment.
 
-ShellBridge does not provide arbitrary host-write shell, general internet access, remote Git, package management, automatic deployment, automatic upgrades, or multi-tenant authorization.
+---
 
-## Supported platform
+## What can ChatGPT do?
 
-The Public Preview support matrix is intentionally narrow:
+### Understand your VPS
+
+ChatGPT can use full Bash syntax inside a read-only view of the directories you choose.
+
+Typical tasks include:
+
+- inspecting files and directory structures;
+- checking disk usage and file sizes;
+- searching source code and logs;
+- reading project metadata;
+- comparing configuration state;
+- running diagnostic pipelines;
+- performing several related checks in one batch.
+
+The generic diagnostic shell cannot persist changes to the host.
+
+### Inspect configuration safely
+
+You can register specific JSON or environment files and explicitly allow selected fields to be inspected.
+
+Credential values are never returned directly. Sensitive fields are reduced to states such as:
+
+```text
+missing
+empty
+set / redacted
+```
+
+This allows ChatGPT to answer questions such as:
+
+> “Is this application configured with the required credentials?”
+
+without exposing the credential itself.
+
+### Run existing project tasks
+
+ChatGPT can run an existing package script or project script in a disposable copy of the project.
+
+Examples include:
+
+```text
+npm test
+npm run check
+python scripts/validate.py
+```
+
+The temporary copy is writable so builds and test caches can work, but all changes are discarded when the task ends. The original project is not modified, and the task has no network access.
+
+### Review local Git repositories
+
+ShellBridge supports narrowly scoped local Git operations:
+
+- inspect repository status;
+- stage explicit paths;
+- unstage explicit paths;
+- prepare an exact local commit;
+- execute only the previously prepared commit.
+
+It does not support remote Git operations such as push, pull, or fetch.
+
+### Perform optional controlled changes
+
+When explicitly enabled by the server owner, ShellBridge can:
+
+- create, replace, patch, and move Markdown or text documents;
+- stage and unstage local Git paths;
+- prepare and execute an immutable local commit proposal;
+- prepare a pre-existing maintenance or deployment script for execution.
+
+These capabilities are disabled by default. ShellBridge does not provide an arbitrary host-write shell.
+
+---
+
+## How does ShellBridge keep this safe?
+
+ShellBridge treats model-generated commands, arguments, repository contents, and command output as untrusted input.
+
+### Read-only by default
+
+General diagnostics run as an unprivileged identity inside a read-only Bubblewrap filesystem view.
+
+### No network access
+
+The diagnostic sandbox receives an isolated network namespace. Network and Unix socket creation are additionally restricted with seccomp.
+
+### Sensitive paths are hidden
+
+Known credential, session, private-key, database, shell-history, browser-profile, cloud-client, and control-socket paths are masked from the sandbox. Administrators can block additional paths.
+
+### Output is redacted
+
+ShellBridge scans command output for credential-like material before returning it to ChatGPT. Registered configuration readers apply stricter field-level disclosure rules.
+
+### Commands are bounded
+
+Diagnostic and project tasks are constrained by timeouts, output limits, process limits, file-size limits, memory limits, rlimits, and cgroup controls.
+
+### Write tools are separate
+
+Persistent capabilities do not inherit permission from read-only shell access. They require both the global write switch and the switch for the exact capability being used.
+
+### Consequential actions are frozen
+
+Local Git commits and pre-existing script executions use an immutable prepare/execute flow.
+
+Preparation records the exact repository or script identity, content state, arguments, working directory, resource limits, and relevant Git state. Execution accepts only the generated proposal ID, revalidates the frozen state, and prevents replay.
+
+---
+
+## Quick start
+
+### Requirements
+
+ShellBridge Public Preview currently requires:
 
 - Ubuntu 24.04;
 - Linux x86_64;
 - Node.js 22 or newer;
+- Bubblewrap;
 - cgroup v2;
-- Bubblewrap and a C17 compiler;
-- a root-managed service.
+- a C17 compiler;
+- root access for the supported deployment model.
 
-The native build fails clearly on unsupported operating systems or CPU architectures. ARM64, Docker, Kubernetes, and arbitrary-user mode are not supported in this release.
-
-## Install and run locally
-
-Install the host prerequisites on Ubuntu 24.04:
+Install the Ubuntu prerequisites:
 
 ```bash
 sudo apt-get update
 sudo apt-get install --yes build-essential bubblewrap
-node --version
 ```
 
-Install Node.js 22+ using a source you trust, then:
+### Build ShellBridge
 
 ```bash
 git clone https://github.com/fengyincheng/ShellBridge.git
 cd ShellBridge
+
 npm ci
 npm run build
 cp .env.example .env
 ```
 
-Edit `.env` and set at least:
+Open `.env` and follow the comments for the required credentials, database path, public URL, and readable roots.
 
-```bash
-SHELLBRIDGE_BEARER_TOKEN=replace-with-a-long-random-secret
-SHELLBRIDGE_DATA_KEY=replace-with-output-from-openssl-rand-base64-32
-SHELLBRIDGE_OAUTH_OWNER_SECRET=replace-with-an-independent-random-secret
-SHELLBRIDGE_PUBLIC_BASE_URL=http://127.0.0.1:8765
-SHELLBRIDGE_DATABASE_PATH=/tmp/shellbridge-dev.db
-```
-
-Generate the data key with:
+Generate the required 32-byte data key with:
 
 ```bash
 openssl rand -base64 32
 ```
 
-Load the environment, run the read-only preflight, then start:
+Load the environment and run the read-only preflight:
 
 ```bash
 set -a
 . ./.env
 set +a
+
 npm run doctor
+```
+
+Then start ShellBridge:
+
+```bash
 npm start
 ```
 
-The process always listens on loopback. The default is `127.0.0.1:8765`; `SHELLBRIDGE_PORT` may change the port, but the host cannot be configured to `0.0.0.0`. A local health check requires the full Bearer value:
+ShellBridge listens on loopback only. The default address is:
 
-```bash
-curl --fail --header "Authorization: Bearer $SHELLBRIDGE_BEARER_TOKEN" \
-  http://127.0.0.1:8765/health
+```text
+127.0.0.1:8765
 ```
 
-`npm run doctor` reports prerequisites and configuration only. It does not install packages, edit the host, create a proxy, or enable writes.
+The listen host cannot be changed to `0.0.0.0`.
 
-## MCP and OAuth
+---
 
-The MCP endpoint is:
+## Connect ChatGPT
+
+For remote access, put an HTTPS reverse proxy or authenticated tunnel in front of ShellBridge:
+
+```text
+ChatGPT
+   │
+   │ HTTPS
+   ▼
+Reverse proxy or authenticated tunnel
+   │
+   │ loopback
+   ▼
+127.0.0.1:8765
+```
+
+Set `SHELLBRIDGE_PUBLIC_BASE_URL` to the deployment’s exact public HTTPS origin.
+
+The MCP endpoint will be:
 
 ```text
 https://shellbridge.example.com/mcp
 ```
 
-For ChatGPT, set `SHELLBRIDGE_PUBLIC_BASE_URL` to that deployment's exact HTTPS origin. ShellBridge derives its MCP resource, OAuth issuer and metadata, and OpenAPI server from this one value. See [ChatGPT connection guidance](docs/chatgpt-guidance.md).
+ShellBridge publishes the OAuth authorization-server and protected-resource metadata that ChatGPT needs, derived from the same public URL.
 
-Dynamic OAuth clients register at `/oauth/register`, use Authorization Code with PKCE, and are restricted to administrator-configured redirect hosts. The owner authorizes a client using the local `SHELLBRIDGE_OAUTH_OWNER_SECRET`. This establishes the single owner principal; it does not turn a client confirmation dialog into cryptographic backend authorization.
+See [ChatGPT connection guidance](docs/chatgpt-guidance.md) for the connection contract and expected client behavior.
 
-## Write capabilities and proposals
+Never expose port `8765` directly to the public internet.
 
-All persistent capabilities are off by default:
+---
+
+## systemd deployment
+
+An example root-managed unit is included under:
+
+```text
+deploy/systemd/
+```
+
+The supplied unit assumes ShellBridge is installed at `/opt/shellbridge`.
+
+Install the templates:
+
+```bash
+sudo install -d -o root -g root -m 0700 \
+  /etc/shellbridge \
+  /var/lib/shellbridge
+
+sudo install -o root -g root -m 0600 \
+  deploy/systemd/shellbridge.env.example \
+  /etc/shellbridge/shellbridge.env
+
+sudo install -o root -g root -m 0644 \
+  deploy/systemd/shellbridge.service \
+  /etc/systemd/system/shellbridge.service
+```
+
+Populate every required value in `/etc/shellbridge/shellbridge.env`, then:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now shellbridge
+```
+
+Review all paths and settings before starting the service. The included unit is an Ubuntu 24.04 example, not a universal distribution package.
+
+---
+
+## Capability switches
+
+All persistent capabilities are disabled by default:
 
 ```text
 SHELLBRIDGE_WRITE_ACTIONS_ENABLED=false
@@ -133,76 +402,108 @@ SHELLBRIDGE_LOCAL_GIT_WRITES_ENABLED=false
 SHELLBRIDGE_EXISTING_SCRIPT_RUNS_ENABLED=false
 ```
 
-The total switch and the relevant capability switch must both be enabled locally. Enabling one capability does not unlock arbitrary host writes.
+The global switch and the relevant capability switch must both be enabled locally. Enabling one capability does not unlock unrelated write operations.
 
-Git commits and pre-existing script runs use a prepare/execute flow. Preparation stores an encrypted proposal containing the exact repository or script identity, inputs, limits, and relevant state. Execution revalidates that frozen state, atomically claims the proposal, and prevents replay. Client UI confirmation is expected, but the backend relies on its own local switches and proposal validation.
+---
 
-See [consequential tool contracts](docs/consequential-tools.md) for each tool's exact authority, race checks, idempotence, replay behavior, and kill switch.
+## What ShellBridge does not do
 
-## systemd deployment
+ShellBridge intentionally does not provide:
 
-The example unit assumes the repository is installed at `/opt/shellbridge`:
+- unrestricted SSH access;
+- arbitrary host-write shell commands;
+- general internet access from diagnostic commands;
+- remote Git push, pull, or fetch;
+- package installation or system upgrades;
+- automatic deployment or service management;
+- automatic DNS, TLS, tunnel, or firewall configuration;
+- multi-tenant authorization;
+- ARM64, Docker, or Kubernetes support in this preview.
+
+These are product boundaries, not missing shortcuts to be bypassed.
+
+---
+
+## Supported platform
+
+The current support matrix is intentionally narrow:
+
+| Component | Supported |
+|---|---|
+| Operating system | Ubuntu 24.04 |
+| Architecture | Linux x86_64 |
+| Node.js | 22 or newer |
+| Sandbox | Bubblewrap |
+| Resource control | cgroup v2 |
+| Service model | Root-managed |
+| ARM64 | Not supported |
+| Docker / Kubernetes | Not supported |
+
+The native build fails clearly on unsupported operating systems and CPU architectures.
+
+---
+
+## Documentation
+
+- [ChatGPT connection guidance](docs/chatgpt-guidance.md)
+- [MCP interface](docs/mcp.md)
+- [Implemented capabilities](docs/implementation-status.md)
+- [Consequential tool contracts](docs/consequential-tools.md)
+- [Security threat model](docs/threat-model.md)
+- [Implementation defaults](docs/implementation-defaults.md)
+- [Security policy](SECURITY.md)
+- [Contributing guide](CONTRIBUTING.md)
+- [Changelog](CHANGELOG.md)
+
+---
+
+## Development
+
+Run the ordinary tests and build:
 
 ```bash
-sudo git clone https://github.com/fengyincheng/ShellBridge.git /opt/shellbridge
-cd /opt/shellbridge
-sudo npm ci
-sudo npm run build
-sudo install -d -o root -g root -m 0700 /etc/shellbridge /var/lib/shellbridge
-sudo install -o root -g root -m 0600 \
-  deploy/systemd/shellbridge.env.example /etc/shellbridge/shellbridge.env
-sudo install -o root -g root -m 0644 \
-  deploy/systemd/shellbridge.service /etc/systemd/system/shellbridge.service
+npm run check
 ```
 
-Stop here and populate every required secret and the correct public URL in `/etc/shellbridge/shellbridge.env`. Do not start the service with the placeholder values. Then:
+The ordinary suite uses controlled test doubles for generic shell execution.
 
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable --now shellbridge
-```
-
-Review paths for your host; this unit is an Ubuntu 24.04 example, not a universal distribution package.
-
-## HTTPS reverse proxy
-
-Never expose port 8765 directly to the public internet. Put an HTTPS reverse proxy or authenticated tunnel in front of loopback:
-
-```text
-HTTPS reverse proxy or authenticated tunnel
-    ↓
-127.0.0.1:8765
-```
-
-The proxy must preserve authorization headers, support streaming HTTP responses, and limit request bodies and timeouts appropriately. ShellBridge does not provision certificates, tunnels, DNS, or firewall rules.
-
-## Security boundaries and limitations
-
-- The root administrator, ShellBridge source and native helper, Linux kernel, Bubblewrap, seccomp, cgroup v2, and local configuration are trusted.
-- Model-generated shell, MCP arguments, repository contents, script output, and dynamic OAuth client metadata are untrusted.
-- A compromised host root, kernel exploit, complete side-channel resistance, and multi-tenant isolation are out of scope.
-- The default read view is `/root`; precise deny rules hide known sensitive resources. Deploy on a dedicated or clearly isolated host and review the configured roots.
-- REST OpenAPI is a concise path summary, not a promise of a stable general-purpose REST API.
-
-See [the threat model](docs/threat-model.md), [security policy](SECURITY.md), and [implementation status](docs/implementation-status.md).
-
-## Tests
-
-```bash
-npm run test:core
-npm run build
-```
-
-The ordinary suite uses a controlled test double for generic shell execution and skips privileged native acceptance tests. On a supported, disposable Ubuntu 24.04 x86_64 host with root access, Bubblewrap, and writable cgroup v2:
+Privileged native acceptance tests require a supported, disposable Ubuntu 24.04 x86_64 host with root access, Bubblewrap, and writable cgroup v2:
 
 ```bash
 sudo --preserve-env=PATH npm run test:privileged
 ```
 
-Do not run privileged acceptance on a host you have not prepared for destructive mount/cgroup test fixtures.
+Do not run privileged acceptance tests on a host you have not prepared for their mount and cgroup fixtures.
 
-## Contributing and license
+---
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before changing a security boundary. Vulnerabilities belong in private vulnerability reports, not public issues.
+## Security
 
-ShellBridge is licensed under the Apache License 2.0.
+ShellBridge is security-sensitive infrastructure.
+
+Before deploying it:
+
+- read the [threat model](docs/threat-model.md);
+- review the configured readable and blocked paths;
+- keep the service bound to loopback;
+- put authenticated HTTPS in front of it;
+- keep persistent capabilities disabled unless needed;
+- deploy it on a dedicated or clearly isolated VPS where practical.
+
+ShellBridge does not replace operating-system hardening, account isolation, backups, or careful administration.
+
+To report a vulnerability, follow [SECURITY.md](SECURITY.md) rather than opening a public issue.
+
+---
+
+## Public Preview
+
+ShellBridge v0.3.0 is an early public release. The security model, supported platform, configuration format, and MCP tools may change as the project receives real-world review.
+
+Feedback, testing, documentation improvements, and carefully scoped contributions are welcome.
+
+---
+
+## License
+
+ShellBridge is licensed under the [Apache License 2.0](LICENSE).
