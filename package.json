@@ -1,0 +1,55 @@
+{
+  "name": "shellbridge",
+  "version": "0.3.0",
+  "description": "A security-focused MCP bridge for controlled and auditable Linux operations",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "keywords": [
+    "mcp",
+    "linux",
+    "security",
+    "sandbox",
+    "operations"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fengyincheng/ShellBridge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fengyincheng/ShellBridge/issues"
+  },
+  "homepage": "https://github.com/fengyincheng/ShellBridge#readme",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "prebuild": "node scripts/check-version.mjs",
+    "prebuild:native": "node scripts/check-platform.mjs",
+    "build:native": "mkdir -p dist/native && cc -std=c17 -O2 -Wall -Wextra -Werror native/shellbridge-helper.c -o dist/native/shellbridge-helper && dist/native/shellbridge-helper write-seccomp dist/native/network-deny.bpf",
+    "build": "npm run build:native && tsc -p tsconfig.json",
+    "start": "node dist/src/server.js",
+    "doctor": "node scripts/doctor.mjs",
+    "test": "npm run test:core",
+    "pretest:core": "npm run build:native",
+    "test:core": "SHELLBRIDGE_TEST_FAKE_SANDBOX=1 vitest run test/api.test.ts test/git.test.ts --testTimeout=15000 --hookTimeout=15000 --pool=threads --maxWorkers=1 --fileParallelism=false && SHELLBRIDGE_TEST_FAKE_SANDBOX=1 vitest run test/capabilities.test.ts --testTimeout=15000 --hookTimeout=15000 --pool=threads --maxWorkers=1 --fileParallelism=false && vitest run test/config-inspector.test.ts test/config.test.ts test/host-observation.test.ts test/sandboxed-shell.test.ts --testTimeout=15000 --hookTimeout=15000 --pool=threads --maxWorkers=1 --fileParallelism=false",
+    "test:privileged": "SHELLBRIDGE_NATIVE_ACCEPTANCE=1 vitest run test/sandboxed-shell.test.ts test/host-observation.test.ts --testTimeout=15000 --hookTimeout=15000 --pool=threads --maxWorkers=1 --fileParallelism=false",
+    "test:watch": "vitest",
+    "check": "npm run test:core && npm run build"
+  },
+  "dependencies": {
+    "@fastify/formbody": "^8.0.2",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "better-sqlite3": "^12.2.0",
+    "fastify": "^5.4.0",
+    "yaml": "^2.8.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.2.0"
+  }
+}
