@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1200" height="420" viewBox="0 0 1200 420"
+     role="img" aria-labelledby="boundary-title boundary-desc">
+  <title id="boundary-title">Why not just expose SSH — the ShellBridge boundary</title>
+  <desc id="boundary-desc">ChatGPT connects over HTTPS and OAuth to ShellBridge, which exposes a read-only diagnostic sandbox, sensitive-path masking, output redaction, time and resource limits, and optional narrowly scoped write tools, in front of your VPS.</desc>
+
+  <rect width="1200" height="420" rx="24" fill="#FBFAF6"/>
+  <rect x="0.75" y="0.75" width="1198.5" height="418.5" rx="23.25" fill="none" stroke="#E5E1D8" stroke-width="1.5"/>
+
+  <g id="chatgpt-node" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
+    <rect x="56" y="172" width="170" height="76" rx="16" fill="#FFFFFF" stroke="#E5E1D8" stroke-width="1.5"/>
+    <text x="141" y="219" font-size="24" font-weight="600" fill="#1C222B" text-anchor="middle">ChatGPT</text>
+  </g>
+
+  <line x1="236" y1="210" x2="352" y2="210" stroke="#0F766E" stroke-width="2.5"/>
+  <path d="M346 203 L358 210 L346 217 Z" fill="#0F766E"/>
+  <text x="296" y="192" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" fill="#68727F" text-anchor="middle">HTTPS + OAuth</text>
+
+  <g id="shellbridge-panel" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
+    <rect x="366" y="31" width="540" height="358" rx="20" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.5"/>
+    <text x="390" y="66" font-size="26" font-weight="700" fill="#0F766E">ShellBridge</text>
+    <g transform="translate(858 42)">
+      <rect x="0" y="8" width="20" height="16" rx="4" fill="#0F766E"/>
+      <path d="M4 8 V6 a6 6 0 0 1 12 0 V8" fill="none" stroke="#0F766E" stroke-width="2.4"/>
+    </g>
+    <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20" fill="#2B333E">
+      <rect x="390" y="84" width="492" height="44" rx="10" fill="#F6F4EE"/>
+      <circle cx="412" cy="106" r="4.5" fill="#0F766E"/>
+      <text x="430" y="113">read-only diagnostic sandbox</text>
+
+      <rect x="390" y="140" width="492" height="44" rx="10" fill="#F6F4EE"/>
+      <circle cx="412" cy="162" r="4.5" fill="#0F766E"/>
+      <text x="430" y="169">sensitive-path masking</text>
+
+      <rect x="390" y="196" width="492" height="44" rx="10" fill="#F6F4EE"/>
+      <circle cx="412" cy="218" r="4.5" fill="#0F766E"/>
+      <text x="430" y="225">output redaction</text>
+
+      <rect x="390" y="252" width="492" height="44" rx="10" fill="#F6F4EE"/>
+      <circle cx="412" cy="274" r="4.5" fill="#0F766E"/>
+      <text x="430" y="281">time and resource limits</text>
+
+      <rect x="390" y="308" width="492" height="44" rx="10" fill="#F6F4EE"/>
+      <circle cx="412" cy="330" r="4.5" fill="#0F766E"/>
+      <text x="430" y="337">optional, narrowly scoped write tools</text>
+    </g>
+  </g>
+
+  <line x1="916" y1="210" x2="980" y2="210" stroke="#0F766E" stroke-width="2.5"/>
+  <path d="M974 203 L986 210 L974 217 Z" fill="#0F766E"/>
+
+  <g id="vps-node" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
+    <rect x="994" y="172" width="150" height="76" rx="16" fill="#FFFFFF" stroke="#E5E1D8" stroke-width="1.5"/>
+    <text x="1069" y="219" font-size="24" font-weight="600" fill="#1C222B" text-anchor="middle">Your VPS</text>
+  </g>
+</svg>

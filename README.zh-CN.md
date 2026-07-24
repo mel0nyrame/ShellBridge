@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./assets/readme/hero-zh-cn.svg" width="100%" alt="ShellBridge — 让 ChatGPT 看见你的 VPS，而不是把 SSH 交给它。一个让 ChatGPT 获得只读、路径屏蔽、输出脱敏的 Ubuntu VPS 视图的 MCP 服务器。">
+</p>
+
 # ShellBridge
 
 [English](README.md) | 简体中文
@@ -47,19 +51,9 @@ ShellBridge 让 ChatGPT 直接检查相关证据。当信息足够完整时，�
 
 没有 ShellBridge 时，一次技术排查通常是这样的：
 
-```text
-ChatGPT 给出一条命令
-        ↓
-你复制到 SSH 终端
-        ↓
-你再复制输出结果
-        ↓
-把结果发回 ChatGPT
-        ↓
-ChatGPT 再给出下一条命令
-        ↓
-不断重复
-```
+<p align="center">
+  <img src="./assets/readme/manual-relay-zh-cn.svg" width="100%" alt="没有 ShellBridge 时：ChatGPT 给出一条命令，你复制到 SSH 终端，你再复制输出结果，把结果发回 ChatGPT，ChatGPT 再给出下一条命令，不断重复。">
+</p>
 
 这个过程不只麻烦，还很容易出错：
 
@@ -94,16 +88,9 @@ OpenAI 当前文档将 Codex 与 ChatGPT Work 归入同一套 agentic usage 结�
 
 推荐的工作方式：
 
-```text
-ChatGPT Chat + ShellBridge
-    检查现状、理解问题、讨论方案、编写计划
-                        ↓
-Codex 或 ChatGPT Work
-    执行具体实现
-                        ↓
-ChatGPT Chat + ShellBridge
-    检查改动、复核结果
-```
+<p align="center">
+  <img src="./assets/readme/plan-execute-review-zh-cn.svg" width="100%" alt="ChatGPT Chat 配合 ShellBridge 检查现状、理解问题、讨论方案、编写计划；Codex 或 ChatGPT Work 执行具体实现；ChatGPT Chat 配合 ShellBridge 检查改动、复核结果。">
+</p>
 
 ---
 
@@ -141,22 +128,9 @@ Codex 或 Work 负责执行。
 
 ShellBridge 提供的是一组受限制的 MCP 工具：
 
-```text
-ChatGPT
-   │
-   │  HTTPS + OAuth
-   ▼
-ShellBridge
-   │
-   ├── 只读诊断沙箱
-   ├── 敏感路径屏蔽
-   ├── 输出内容脱敏
-   ├── 时间与资源限制
-   └── 可选的窄范围写入工具
-   │
-   ▼
-你的 VPS
-```
+<p align="center">
+  <img src="./assets/readme/security-boundary-zh-cn.svg" width="100%" alt="ChatGPT 通过 HTTPS 和 OAuth 连接 ShellBridge——只读诊断沙箱、敏感路径屏蔽、输出内容脱敏、时间与资源限制、可选的窄范围写入工具——然后才到你的 VPS。">
+</p>
 
 ChatGPT 可以获得足够的信息来有效调查问题，但不会获得无限制 SSH 权限。
 

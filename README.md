@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="ShellBridge — let ChatGPT see your VPS without giving it SSH. An MCP server that gives ChatGPT a read-only, masked, and redacted view of an Ubuntu VPS.">
+</p>
+
 # ShellBridge
 
 English | [简体中文](README.zh-CN.md)
@@ -47,17 +51,9 @@ That plan can then be reviewed by you and handed to Codex, ChatGPT Work, another
 
 Without ShellBridge, a technical conversation often becomes:
 
-```text
-ChatGPT gives you a command
-        ↓
-You copy it into SSH
-        ↓
-You copy the output back
-        ↓
-ChatGPT asks for another command
-        ↓
-Repeat
-```
+<p align="center">
+  <img src="./assets/readme/manual-relay.svg" width="100%" alt="Without ShellBridge: ChatGPT gives you a command, you copy it into SSH, you copy the output back, ChatGPT asks for another command — repeat.">
+</p>
 
 This is slow and surprisingly error-prone. Output gets truncated, commands run in the wrong directory, context is lost between messages, and the user becomes a manual transport layer between two windows.
 
@@ -84,16 +80,9 @@ Then use Codex or ChatGPT Work when the task genuinely needs sustained execution
 
 OpenAI’s current documentation places Codex and ChatGPT Work in the same agentic usage pool, while Chat remains the separate conversational experience. ShellBridge lets you use ordinary Chat for investigation, explanation, and long-form planning while saving the shared Codex/Work allowance for execution-heavy tasks. Usage policies can change, so check [ChatGPT Work and Codex](https://help.openai.com/en/articles/20001275-chatgpt-work-and-codex) and the [current Codex usage documentation](https://help.openai.com/en/articles/11369540) for your plan.
 
-```text
-ChatGPT Chat + ShellBridge
-    inspect, understand, discuss, and write the plan
-                        ↓
-Codex or ChatGPT Work
-    perform the implementation
-                        ↓
-ChatGPT Chat + ShellBridge
-    inspect and review the result
-```
+<p align="center">
+  <img src="./assets/readme/plan-execute-review.svg" width="100%" alt="ChatGPT Chat with ShellBridge inspects, understands, discusses, and writes the plan; Codex or ChatGPT Work performs the implementation; ChatGPT Chat with ShellBridge inspects and reviews the result.">
+</p>
 
 ---
 
@@ -124,22 +113,9 @@ An ordinary SSH session gives its caller broad, interactive authority. Most diag
 
 ShellBridge exposes narrow MCP tools instead:
 
-```text
-ChatGPT
-   │
-   │  HTTPS + OAuth
-   ▼
-ShellBridge
-   │
-   ├── read-only diagnostic sandbox
-   ├── sensitive-path masking
-   ├── output redaction
-   ├── time and resource limits
-   └── optional, narrowly scoped write tools
-   │
-   ▼
-Your VPS
-```
+<p align="center">
+  <img src="./assets/readme/security-boundary.svg" width="100%" alt="ChatGPT connects over HTTPS and OAuth to ShellBridge — a read-only diagnostic sandbox with sensitive-path masking, output redaction, time and resource limits, and optional narrowly scoped write tools — in front of your VPS.">
+</p>
 
 ChatGPT gets enough visibility to investigate effectively without receiving unrestricted SSH access.
 
