@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1200" height="280" viewBox="0 0 1200 280"
+     role="img" aria-labelledby="flow-title flow-desc">
+  <title id="flow-title">Plan with Chat, execute with Codex, review with Chat</title>
+  <desc id="flow-desc">ChatGPT Chat with ShellBridge inspects, understands, discusses, and writes the plan; Codex or ChatGPT Work performs the implementation; ChatGPT Chat with ShellBridge inspects and reviews the result.</desc>
+
+  <rect width="1200" height="280" rx="24" fill="#FBFAF6"/>
+  <rect x="0.75" y="0.75" width="1198.5" height="278.5" rx="23.25" fill="none" stroke="#E5E1D8" stroke-width="1.5"/>
+
+  <g id="stages" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
+    <!-- stage 1 -->
+    <rect x="44" y="62" width="340" height="156" rx="16" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.5"/>
+    <text x="68" y="112" font-size="19" font-weight="700" fill="#1C222B">ChatGPT Chat + ShellBridge</text>
+    <text x="68" y="150" font-size="18" fill="#68727F">inspect, understand, discuss,</text>
+    <text x="68" y="176" font-size="18" fill="#68727F">and write the plan</text>
+
+    <!-- stage 2 -->
+    <rect x="430" y="62" width="340" height="156" rx="16" fill="#FFFFFF" stroke="#E5E1D8" stroke-width="1.5"/>
+    <text x="454" y="112" font-size="19" font-weight="700" fill="#1C222B">Codex or ChatGPT Work</text>
+    <text x="454" y="150" font-size="18" fill="#68727F">perform the implementation</text>
+
+    <!-- stage 3 -->
+    <rect x="816" y="62" width="340" height="156" rx="16" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.5"/>
+    <text x="840" y="112" font-size="19" font-weight="700" fill="#1C222B">ChatGPT Chat + ShellBridge</text>
+    <text x="840" y="150" font-size="18" fill="#68727F">inspect and review the result</text>
+
+    <g stroke="#0F766E" stroke-width="2.5" fill="#0F766E">
+      <line x1="392" y1="140" x2="422" y2="140"/>
+      <path d="M416 133 L428 140 L416 147 Z" stroke="none"/>
+      <line x1="778" y1="140" x2="808" y2="140"/>
+      <path d="M802 133 L814 140 L802 147 Z" stroke="none"/>
+    </g>
+  </g>
+</svg>

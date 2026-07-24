@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1200" height="400" viewBox="0 0 1200 400"
+     role="img" aria-labelledby="hero-title hero-desc">
+  <title id="hero-title">ShellBridge — let ChatGPT see your VPS without giving it SSH</title>
+  <desc id="hero-desc">ShellBridge is an MCP server that gives ChatGPT a read-only, network-isolated, masked and redacted view of an Ubuntu VPS. Public preview v0.3.0, Ubuntu 24.04, Linux x86_64, Node.js 22 or newer.</desc>
+
+  <rect width="1200" height="400" rx="24" fill="#FBFAF6"/>
+  <rect x="0.75" y="0.75" width="1198.5" height="398.5" rx="23.25" fill="none" stroke="#E5E1D8" stroke-width="1.5"/>
+
+  <g id="title-block" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
+    <text x="56" y="86" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" letter-spacing="3" fill="#68727F">MCP SERVER · VPS VISIBILITY</text>
+    <text x="54" y="160" font-size="68" font-weight="700" fill="#1C222B">ShellBridge</text>
+    <text x="56" y="216" font-size="29" font-weight="500" fill="#2B333E">Let ChatGPT see your VPS —</text>
+    <text x="56" y="256" font-size="29" font-weight="500" fill="#2B333E">without giving it <tspan fill="#B42318">SSH</tspan>.</text>
+    <line x1="268" y1="247" x2="322" y2="247" stroke="#B42318" stroke-width="2.5" stroke-linecap="round"/>
+    <text x="56" y="316" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" fill="#68727F">v0.3.0 · Ubuntu 24.04 · Linux x86_64 · Node.js 22+</text>
+  </g>
+
+  <line x1="688" y1="48" x2="688" y2="352" stroke="#DCD7CA" stroke-width="1.5" stroke-dasharray="2 7" stroke-linecap="round"/>
+
+  <g id="safe-path" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
+    <rect x="832" y="36" width="200" height="50" rx="14" fill="#FFFFFF" stroke="#E5E1D8" stroke-width="1.5"/>
+    <text x="932" y="67" font-size="23" font-weight="600" fill="#1C222B" text-anchor="middle">ChatGPT</text>
+
+    <line x1="932" y1="88" x2="932" y2="110" stroke="#0F766E" stroke-width="2"/>
+    <path d="M926 104 L932 114 L938 104 Z" fill="#0F766E"/>
+    <text x="952" y="106" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" fill="#68727F">HTTPS + OAuth</text>
+
+    <rect x="764" y="118" width="336" height="176" rx="18" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.5"/>
+    <text x="788" y="152" font-size="22" font-weight="700" fill="#0F766E">ShellBridge</text>
+    <g transform="translate(1058 130)">
+      <rect x="0" y="8" width="20" height="16" rx="4" fill="#0F766E"/>
+      <path d="M4 8 V6 a6 6 0 0 1 12 0 V8" fill="none" stroke="#0F766E" stroke-width="2.4"/>
+    </g>
+    <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" fill="#2B333E">
+      <text x="788" y="184"><tspan fill="#0F766E">›</tspan> read-only diagnostic sandbox</text>
+      <text x="788" y="210"><tspan fill="#0F766E">›</tspan> sensitive-path masking</text>
+      <text x="788" y="236"><tspan fill="#0F766E">›</tspan> output redaction</text>
+      <text x="788" y="262"><tspan fill="#0F766E">›</tspan> time and resource limits</text>
+    </g>
+
+    <line x1="932" y1="296" x2="932" y2="318" stroke="#0F766E" stroke-width="2"/>
+    <path d="M926 312 L932 322 L938 312 Z" fill="#0F766E"/>
+    <text x="952" y="314" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" fill="#68727F">narrow MCP tools</text>
+
+    <rect x="832" y="326" width="200" height="50" rx="14" fill="#FFFFFF" stroke="#E5E1D8" stroke-width="1.5"/>
+    <text x="932" y="357" font-size="23" font-weight="600" fill="#1C222B" text-anchor="middle">Your VPS</text>
+  </g>
+</svg>
