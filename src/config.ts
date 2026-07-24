@@ -29,7 +29,6 @@ export interface GatewayConfig {
   sandboxBlockedPaths: string[];
   sandboxCgroupRoot: string;
   sandboxRequireCgroup: boolean;
-  claudeCommandPaths: string[];
 }
 
 export type ConfigOverrides = Omit<Partial<GatewayConfig>, "encryptionKey"> & { encryptionKey?: Buffer | string };
@@ -186,6 +185,5 @@ export function createConfig(overrides: ConfigOverrides = {}): GatewayConfig {
     ]).map((item) => path.resolve(item)))],
     sandboxCgroupRoot: path.resolve(overrides.sandboxCgroupRoot ?? process.env.SHELLBRIDGE_CGROUP_ROOT ?? "/sys/fs/cgroup/shellbridge"),
     sandboxRequireCgroup: overrides.sandboxRequireCgroup ?? true,
-    claudeCommandPaths: (overrides.claudeCommandPaths ?? process.env.SHELLBRIDGE_CLAUDE_COMMAND_PATHS?.split(":").filter(Boolean) ?? ["/usr/local/bin/claude", "/usr/bin/claude"]).map((item) => path.resolve(item)),
   };
 }

@@ -1,7 +1,7 @@
 {
   "name": "shellbridge",
   "version": "0.3.0",
-  "description": "A security-focused MCP bridge for controlled and auditable Linux operations",
+  "description": "Give ChatGPT fast, safe, and auditable visibility into a Linux VPS through MCP",
   "private": true,
   "type": "module",
   "license": "Apache-2.0",
@@ -33,8 +33,8 @@
     "doctor": "node scripts/doctor.mjs",
     "test": "npm run test:core",
     "pretest:core": "npm run build:native",
-    "test:core": "SHELLBRIDGE_TEST_FAKE_SANDBOX=1 vitest run test/api.test.ts test/git.test.ts --testTimeout=15000 --hookTimeout=15000 --pool=threads --maxWorkers=1 --fileParallelism=false && SHELLBRIDGE_TEST_FAKE_SANDBOX=1 vitest run test/capabilities.test.ts --testTimeout=15000 --hookTimeout=15000 --pool=threads --maxWorkers=1 --fileParallelism=false && vitest run test/config-inspector.test.ts test/config.test.ts test/host-observation.test.ts test/sandboxed-shell.test.ts --testTimeout=15000 --hookTimeout=15000 --pool=threads --maxWorkers=1 --fileParallelism=false",
-    "test:privileged": "SHELLBRIDGE_NATIVE_ACCEPTANCE=1 vitest run test/sandboxed-shell.test.ts test/host-observation.test.ts --testTimeout=15000 --hookTimeout=15000 --pool=threads --maxWorkers=1 --fileParallelism=false",
+    "test:core": "SHELLBRIDGE_TEST_FAKE_SANDBOX=1 vitest run test/api.test.ts test/git.test.ts --testTimeout=15000 --hookTimeout=15000 --pool=threads --maxWorkers=1 --fileParallelism=false && SHELLBRIDGE_TEST_FAKE_SANDBOX=1 vitest run test/capabilities.test.ts --testTimeout=15000 --hookTimeout=15000 --pool=threads --maxWorkers=1 --fileParallelism=false && vitest run test/config-inspector.test.ts test/config.test.ts test/sandboxed-shell.test.ts --testTimeout=15000 --hookTimeout=15000 --pool=threads --maxWorkers=1 --fileParallelism=false",
+    "test:privileged": "SHELLBRIDGE_NATIVE_ACCEPTANCE=1 vitest run test/sandboxed-shell.test.ts --testTimeout=15000 --hookTimeout=15000 --pool=threads --maxWorkers=1 --fileParallelism=false",
     "test:watch": "vitest",
     "check": "npm run test:core && npm run build"
   },

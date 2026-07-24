@@ -96,15 +96,6 @@ function createServer(app: FastifyInstance, config: GatewayConfig): McpServer {
     const response = await app.inject({ method: "POST", url: "/v1/inspect/config", headers: internalHeaders, payload: input });
     return textResult(response.body, response.statusCode >= 400);
   });
-  server.registerTool("inspect_command", {
-    title: "Inspect a registered host command",
-    description: "Report whether the registered Claude Code executable is installed, plus its canonical path and version. It runs under a non-root observer profile with no capabilities or network.",
-    inputSchema: z.strictObject({ command_id: z.literal("claude") }),
-    annotations: { readOnlyHint: true, openWorldHint: false },
-  }, async (input) => {
-    const response = await app.inject({ method: "POST", url: "/v1/inspect/command", headers: internalHeaders, payload: input });
-    return textResult(response.body, response.statusCode >= 400);
-  });
   server.registerTool("run_project_task", {
     title: "Run an existing project task read-only",
     description: "Run one package.json script that already exists, or one existing shell/Python/Node/Go project script, inside a no-network Bubblewrap task sandbox. The project is copied to a command-lifetime writable tmpfs so caches, coverage, builds, and reports never change the host. Inline commands are not accepted and no proposal is created.",

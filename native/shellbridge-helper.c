@@ -487,45 +487,6 @@ static void sandbox_init(int argc, char **argv) {
   fail("sandbox_shell_exec_failed");
 }
 
-static void drop_bounding_capabilities(void) {
-  for (int capability = 0; capability <= 63; capability += 1) {
-    if (prctl(PR_CAPBSET_DROP, capability, 0, 0, 0) != 0 && errno != EINVAL) fail("capability_drop_failed");
-  }
-}
-
-static void observe_command(int argc, char **argv) {
-  if (argc != 6 || strcmp(argv[5], "--version") != 0) fail("invalid_helper_request");
-  uid_t uid = (uid_t)parse_unsigned(argv[2], UINT_MAX, "invalid_observer_identity");
-  gid_t gid = (gid_t)parse_unsigned(argv[3], UINT_MAX, "invalid_observer_identity");
-  if (uid == 0 || gid == 0) fail("invalid_observer_identity");
-  if (argv[4][0] != '/' || argv[4][1] == '\0') fail("command_unavailable");
-  int filesystem_root = open("/", O_PATH | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
-  if (filesystem_root < 0) fail("command_unavailable");
-  int executable = openat2_beneath(
-    filesystem_root,
-    argv[4] + 1,
-    O_PATH | O_CLOEXEC,
-    RESOLVE_BENEATH | RESOLVE_NO_MAGICLINKS | RESOLVE_NO_SYMLINKS
-  );
-  close(filesystem_root);
-  if (executable < 0) fail("command_unavailable");
-  struct stat metadata;
-  if (fstat(executable, &metadata) != 0 || !S_ISREG(metadata.st_mode) || metadata.st_uid != 0 || (metadata.st_mode & 0022) != 0) {
-    fail("command_not_trusted");
-  }
-  if (unshare(CLONE_NEWNET) != 0) fail("command_network_isolation_failed");
-  drop_bounding_capabilities();
-  if (setgroups(0, NULL) != 0 || setgid(gid) != 0 || setuid(uid) != 0) fail("observer_identity_failed");
-  if (chdir("/") != 0) fail("observer_cwd_failed");
-  apply_limits("5", "2147483648", "32", "1048576", "64");
-  verify_no_capabilities();
-  install_seccomp();
-  char *const command_argv[] = { argv[4], "--version", NULL };
-  char *const environment[] = { "PATH=/usr/bin:/bin", "HOME=/nonexistent", "LANG=C", "LC_ALL=C", NULL };
-  syscall(SYS_execveat, executable, "", command_argv, environment, AT_EMPTY_PATH);
-  fail("command_exec_failed");
-}
-
 static void cgroup_exec(int argc, char **argv) {
   if (argc < 5 || strcmp(argv[3], "--") != 0) fail("invalid_helper_request");
   char signal_byte;
@@ -559,10 +520,6 @@ int main(int argc, char **argv) {
   }
   if (argc >= 2 && strcmp(argv[1], "sandbox-init") == 0) {
     sandbox_init(argc, argv);
-    return 0;
-  }
-  if (argc >= 2 && strcmp(argv[1], "observe-command") == 0) {
-    observe_command(argc, argv);
     return 0;
   }
   if (argc >= 2 && strcmp(argv[1], "cgroup-exec") == 0) {

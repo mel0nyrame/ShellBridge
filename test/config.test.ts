@@ -30,7 +30,7 @@ describe("generic read shell configuration", () => {
       "/root/.claude/settings.json",
     ]));
     expect(config.sandboxBlockedPaths).not.toEqual(expect.arrayContaining([
-      "/root/shellbridge",
+      "/root/example-project",
       "/root/.claude",
       "/root/.codex",
       "/root/.config",

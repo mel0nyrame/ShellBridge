@@ -11,7 +11,6 @@ import { OAuthService } from "./oauth.js";
 import { getApprovalSmokeState, type SmokeState } from "./policy.js";
 import { redact, registerExactRedactionSecrets } from "./redactor.js";
 import { ConfigInspector } from "./config-inspector.js";
-import { HostObservation } from "./host-observation.js";
 import { SandboxedShell } from "./sandboxed-shell.js";
 import { DocumentWriter } from "./document-writer.js";
 import { GitService, type GitCommitProposal } from "./git-service.js";
@@ -22,7 +21,7 @@ import { SHELLBRIDGE_VERSION } from "./version.js";
 export function createOpenApi(config: Pick<GatewayConfig, "publicBaseUrl">, version = SHELLBRIDGE_VERSION) {
   return {
     openapi: "3.1.0",
-    info: { title: "ShellBridge", version, description: "Controlled Linux diagnostics and explicitly gated local operations." },
+    info: { title: "ShellBridge", version, description: "Fast, safe, and auditable Linux VPS visibility for ChatGPT through MCP." },
     servers: [{ url: config.publicBaseUrl }],
     components: { securitySchemes: { bearerAuth: { type: "apiKey", in: "header", name: "Authorization", description: "REST administration uses the complete Bearer value; MCP clients use restricted OAuth." } } },
     security: [{ bearerAuth: [] }],
@@ -30,7 +29,6 @@ export function createOpenApi(config: Pick<GatewayConfig, "publicBaseUrl">, vers
       "/v1/shell/commands": { post: { operationId: "runShellCommand", summary: "Run one Bash diagnostic in the read-only Bubblewrap sandbox" } },
       "/v1/shell/batches": { post: { operationId: "runShellBatch", summary: "Run an explicit diagnostic batch in separate read-only sandbox calls" } },
       "/v1/inspect/config": { post: { operationId: "inspectConfig", summary: "Read exact registered configuration fields with mandatory redaction" } },
-      "/v1/inspect/command": { post: { operationId: "inspectCommand", summary: "Observe the path and version of a fixed registered host command" } },
       "/v1/tasks/run": { post: { operationId: "runProjectTask", summary: "Run an existing project task in a disposable writable copy" } },
       "/v1/documents/write": { post: { operationId: "writeTextDocument", "x-openai-isConsequential": true, summary: "Atomically write a Markdown or text document" } },
       "/v1/documents/patch": { post: { operationId: "patchTextDocument", "x-openai-isConsequential": true, summary: "Patch exact text in a Markdown or text document" } },
@@ -138,7 +136,6 @@ function operationErrorReply(error: unknown, reply: FastifyReply) {
 interface AppDependencies {
   sandboxedShell?: Pick<SandboxedShell, "run">;
   configInspector?: Pick<ConfigInspector, "inspect">;
-  hostObservation?: Pick<HostObservation, "inspectCommand">;
 }
 
 export async function buildApp(config: GatewayConfig = createConfig(), dependencies: AppDependencies = {}): Promise<FastifyInstance> {
@@ -162,14 +159,6 @@ export async function buildApp(config: GatewayConfig = createConfig(), dependenc
     disclosedValuesByTarget: config.inspectConfigDisclosures,
     maxBytes: 64 * 1024,
     timeoutMs: 2_000,
-  });
-  const hostObservation = dependencies.hostObservation ?? new HostObservation({
-    helperPath: config.nativeHelperPath,
-    observerUid: config.observerUid,
-    observerGid: config.observerGid,
-    commandPaths: { claude: config.claudeCommandPaths },
-    timeoutMs: 5_000,
-    maxOutputBytes: 16 * 1024,
   });
   let sandboxedShell = dependencies.sandboxedShell;
   if (!sandboxedShell) {
@@ -275,17 +264,6 @@ export async function buildApp(config: GatewayConfig = createConfig(), dependenc
         "invalid_selector", "invalid_selectors",
       ].includes(error.message) ? error.message : "config_inspection_failed";
       return reply.code(code === "config_target_not_registered" ? 403 : 400).send({ error: code });
-    }
-  });
-  app.post<{ Body: { command_id?: unknown } }>("/v1/inspect/command", async (request, reply) => {
-    if (request.body?.command_id !== "claude") return reply.code(400).send({ error: "unsupported_command_id" });
-    try {
-      return reply.send({ status: "completed", command_id: "claude", ...(await hostObservation.inspectCommand({ commandId: "claude" })) });
-    } catch (error) {
-      const code = error instanceof Error && ["command_observation_unavailable", "command_version_unrecognized"].includes(error.message)
-        ? error.message
-        : "command_observation_failed";
-      return reply.code(503).send({ error: code });
     }
   });
   app.post<{ Body: CommandInput }>("/v1/shell/commands", async (request, reply) => {

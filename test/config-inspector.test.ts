@@ -11,18 +11,18 @@ afterEach(async () => {
 });
 
 describe("ConfigInspector", () => {
-  test("returns selected Claude settings while reducing credentials to state", async () => {
+  test("returns selected service settings while reducing credentials to state", async () => {
     const root = await mkdtemp(path.join(tmpdir(), "shellbridge-config-"));
     roots.push(root);
-    const configDirectory = path.join(root, "claude");
+    const configDirectory = path.join(root, "service");
     const configPath = path.join(configDirectory, "settings.json");
     await mkdir(configDirectory);
     await writeFile(configPath, JSON.stringify({
       env: {
-        ANTHROPIC_BASE_URL: "https://gateway.example.test/v1",
-        ANTHROPIC_MODEL: "claude-sonnet-test",
-        ANTHROPIC_API_KEY: "sk-ant-secret-never-return",
-        ANTHROPIC_AUTH_TOKEN: "",
+        SERVICE_BASE_URL: "https://gateway.example.test/v1",
+        SERVICE_MODEL: "diagnostic-model",
+        SERVICE_API_KEY: "test-secret-never-return",
+        SERVICE_AUTH_TOKEN: "",
         RETRY_COUNT: 42,
         FEATURE_ENABLED: true,
       },
@@ -33,8 +33,8 @@ describe("ConfigInspector", () => {
       registeredTargets: [configPath],
       disclosedValuesByTarget: {
         [configPath]: {
-          "/env/ANTHROPIC_BASE_URL": ["https://gateway.example.test/v1"],
-          "/env/ANTHROPIC_MODEL": ["claude-sonnet-test"],
+          "/env/SERVICE_BASE_URL": ["https://gateway.example.test/v1"],
+          "/env/SERVICE_MODEL": ["diagnostic-model"],
         },
       },
       maxBytes: 64 * 1024,
@@ -44,10 +44,10 @@ describe("ConfigInspector", () => {
       path: configPath,
       format: "json",
       selectors: [
-        "/env/ANTHROPIC_BASE_URL",
-        "/env/ANTHROPIC_MODEL",
-        "/env/ANTHROPIC_API_KEY",
-        "/env/ANTHROPIC_AUTH_TOKEN",
+        "/env/SERVICE_BASE_URL",
+        "/env/SERVICE_MODEL",
+        "/env/SERVICE_API_KEY",
+        "/env/SERVICE_AUTH_TOKEN",
         "/env/RETRY_COUNT",
         "/env/FEATURE_ENABLED",
       ],
@@ -58,25 +58,25 @@ describe("ConfigInspector", () => {
       path: configPath,
       format: "json",
       fields: [
-        { selector: "/env/ANTHROPIC_BASE_URL", status: "set", value: "https://gateway.example.test/v1" },
-        { selector: "/env/ANTHROPIC_MODEL", status: "set", value: "claude-sonnet-test" },
-        { selector: "/env/ANTHROPIC_API_KEY", status: "set", redacted: true },
-        { selector: "/env/ANTHROPIC_AUTH_TOKEN", status: "empty", redacted: true },
+        { selector: "/env/SERVICE_BASE_URL", status: "set", value: "https://gateway.example.test/v1" },
+        { selector: "/env/SERVICE_MODEL", status: "set", value: "diagnostic-model" },
+        { selector: "/env/SERVICE_API_KEY", status: "set", redacted: true },
+        { selector: "/env/SERVICE_AUTH_TOKEN", status: "empty", redacted: true },
         { selector: "/env/RETRY_COUNT", status: "set", redacted: true },
         { selector: "/env/FEATURE_ENABLED", status: "set", redacted: true },
       ],
     });
-    expect(JSON.stringify(result)).not.toContain("sk-ant-secret-never-return");
+    expect(JSON.stringify(result)).not.toContain("test-secret-never-return");
   });
 
   test("supports exact env selectors and never evaluates or returns credential values", async () => {
     const root = await mkdtemp(path.join(tmpdir(), "shellbridge-env-"));
     roots.push(root);
-    const configPath = path.join(root, "claude.env");
+    const configPath = path.join(root, "service.env");
     await writeFile(configPath, [
-      "ANTHROPIC_BASE_URL=https://gateway.example.test/v1?token=remove-me",
-      "ANTHROPIC_MODEL=claude-opus-test",
-      "ANTHROPIC_API_KEY=short-secret",
+      "SERVICE_BASE_URL=https://gateway.example.test/v1?token=remove-me",
+      "SERVICE_MODEL=diagnostic-model",
+      "SERVICE_API_KEY=short-secret",
       "UNSAFE_BASE_URL=data:text/plain,opaque-secret",
       "PATH_TOKEN_BASE_URL=https://gateway.example.test/api/token/opaque-secret-123456",
     ].join("\n"));
@@ -85,8 +85,8 @@ describe("ConfigInspector", () => {
       registeredTargets: [configPath],
       disclosedValuesByTarget: {
         [configPath]: {
-          ANTHROPIC_BASE_URL: ["https://gateway.example.test/v1?token=remove-me"],
-          ANTHROPIC_MODEL: ["claude-opus-test"],
+          SERVICE_BASE_URL: ["https://gateway.example.test/v1?token=remove-me"],
+          SERVICE_MODEL: ["diagnostic-model"],
           UNSAFE_BASE_URL: ["data:text/plain,opaque-secret"],
           PATH_TOKEN_BASE_URL: ["https://gateway.example.test/api/token/opaque-secret-123456"],
         },
@@ -98,14 +98,14 @@ describe("ConfigInspector", () => {
     const result = await inspector.inspect({
       path: configPath,
       format: "env",
-      selectors: ["ANTHROPIC_BASE_URL", "ANTHROPIC_MODEL", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "UNSAFE_BASE_URL", "PATH_TOKEN_BASE_URL"],
+      selectors: ["SERVICE_BASE_URL", "SERVICE_MODEL", "SERVICE_API_KEY", "SERVICE_AUTH_TOKEN", "UNSAFE_BASE_URL", "PATH_TOKEN_BASE_URL"],
     });
 
     expect(result.fields).toEqual([
-      { selector: "ANTHROPIC_BASE_URL", status: "set", value: "https://gateway.example.test/v1" },
-      { selector: "ANTHROPIC_MODEL", status: "set", value: "claude-opus-test" },
-      { selector: "ANTHROPIC_API_KEY", status: "set", redacted: true },
-      { selector: "ANTHROPIC_AUTH_TOKEN", status: "missing", redacted: true },
+      { selector: "SERVICE_BASE_URL", status: "set", value: "https://gateway.example.test/v1" },
+      { selector: "SERVICE_MODEL", status: "set", value: "diagnostic-model" },
+      { selector: "SERVICE_API_KEY", status: "set", redacted: true },
+      { selector: "SERVICE_AUTH_TOKEN", status: "missing", redacted: true },
       { selector: "UNSAFE_BASE_URL", status: "set", redacted: true },
       { selector: "PATH_TOKEN_BASE_URL", status: "set", redacted: true },
     ]);

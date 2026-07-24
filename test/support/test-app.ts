@@ -84,9 +84,9 @@ export async function createTestApp(options: {
       defaultCwd: fixtureDir,
       inspectConfigRoots: [fixtureDir],
       inspectConfigDisclosures: {
-        [path.join(fixtureDir, "claude.json")]: {
-          "/ANTHROPIC_BASE_URL": ["https://api.example.test"],
-          "/model": ["claude-sonnet"],
+        [path.join(fixtureDir, "service.json")]: {
+          "/SERVICE_BASE_URL": ["https://api.example.test"],
+          "/model": ["diagnostic-model"],
         },
       },
       sandboxReadRoots: [fixtureDir],

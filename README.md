@@ -1,6 +1,6 @@
 # ShellBridge
 
-ShellBridge is a security-focused MCP server that gives AI clients controlled access to a Linux host. General shell diagnostics run inside a read-only, network-isolated Bubblewrap sandbox. Persistent changes are limited to explicit document, local Git, and pre-existing script capabilities, with local kill switches and immutable execution proposals.
+ShellBridge gives ChatGPT fast, safe, and auditable visibility into a Linux VPS through MCP. General shell diagnostics run inside a read-only, network-isolated Bubblewrap sandbox. Persistent changes are limited to explicit document, local Git, and pre-existing script capabilities, with local kill switches and immutable execution proposals.
 
 > **v0.3.0 Public Preview:** ShellBridge is not production-ready. It does not replace a dedicated VPS, virtual machine, container boundary, low-privilege account, HTTPS, or ordinary host hardening.
 
@@ -17,7 +17,7 @@ An SSH session usually gives its caller a broad interactive authority. ShellBrid
 The service remains high-privilege infrastructure because a root-managed process constructs these boundaries and controls host paths.
 
 ```text
-AI client
+ChatGPT
    │  HTTPS + OAuth/Bearer
    ▼
 reverse proxy or authenticated tunnel
@@ -34,7 +34,7 @@ ShellBridge 127.0.0.1:8765
 - Streamable HTTP MCP with Bearer authentication and single-owner OAuth.
 - Full Bash syntax for diagnostics inside a read-only Bubblewrap view.
 - Exact sensitive-path masking, output redaction, timeouts, output limits, rlimits, and cgroup controls.
-- Registered configuration selectors and fixed host-command observation.
+- Registered configuration selectors with mandatory secret redaction.
 - Existing project tasks in a disposable writable copy with no network access.
 - Restricted Markdown/TXT writes under the configured operation root.
 - Local-only Git status, stage, unstage, and immutable commit proposals.
@@ -118,7 +118,7 @@ The MCP endpoint is:
 https://shellbridge.example.com/mcp
 ```
 
-For a remote client, set `SHELLBRIDGE_PUBLIC_BASE_URL` to that deployment's exact HTTPS origin. ShellBridge derives its MCP resource, OAuth issuer and metadata, and OpenAPI server from this one value.
+For ChatGPT, set `SHELLBRIDGE_PUBLIC_BASE_URL` to that deployment's exact HTTPS origin. ShellBridge derives its MCP resource, OAuth issuer and metadata, and OpenAPI server from this one value. See [ChatGPT connection guidance](docs/chatgpt-guidance.md).
 
 Dynamic OAuth clients register at `/oauth/register`, use Authorization Code with PKCE, and are restricted to administrator-configured redirect hosts. The owner authorizes a client using the local `SHELLBRIDGE_OAUTH_OWNER_SECRET`. This establishes the single owner principal; it does not turn a client confirmation dialog into cryptographic backend authorization.
 

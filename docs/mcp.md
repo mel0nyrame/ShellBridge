@@ -1,6 +1,6 @@
 # MCP interface
 
-ShellBridge exposes Streamable HTTP MCP at:
+ChatGPT connects to ShellBridge over Streamable HTTP MCP at:
 
 ```text
 https://shellbridge.example.com/mcp
@@ -8,7 +8,7 @@ https://shellbridge.example.com/mcp
 
 The public URL is configured by `SHELLBRIDGE_PUBLIC_BASE_URL`. OAuth issuer, protected-resource metadata, and the MCP resource are derived from the same value.
 
-Read-only tools include general sandboxed shell commands and batches, registered configuration inspection, fixed command observation, disposable project tasks, local Git status, and proposal inspection. The shell supports full Bash syntax but sees only the configured read-only view. It cannot observe host network state, host process namespaces, systemd control sockets, or other masked resources.
+Read-only tools include general sandboxed shell commands and batches, registered configuration inspection, disposable project tasks, local Git status, and proposal inspection. The shell supports full Bash syntax but sees only the configured read-only view. It cannot observe host network state, host process namespaces, systemd control sockets, or other masked resources.
 
 Persistent tools cover restricted Markdown/TXT files, local Git index changes, exact local commits, and pre-existing scripts. The total write switch and relevant capability switch must be enabled locally.
 

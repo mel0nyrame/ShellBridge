@@ -92,8 +92,8 @@ describe("ShellBridge command API", () => {
   test("inspects registered config selectors but never returns an API key", async () => {
     const app = await createTestApp({
       files: {
-        "claude.json":
-          '{"ANTHROPIC_API_KEY":"sk-ant-api03-secretvalue","ANTHROPIC_BASE_URL":"https://api.example.test","model":"claude-sonnet"}',
+        "service.json":
+          '{"SERVICE_API_KEY":"test-secret-never-return","SERVICE_BASE_URL":"https://api.example.test","model":"diagnostic-model"}',
       },
     });
     apps.push(app);
@@ -103,9 +103,9 @@ describe("ShellBridge command API", () => {
       url: "/v1/inspect/config",
       headers: app.authHeaders,
       payload: {
-        path: path.join(app.fixtureDir, "claude.json"),
+        path: path.join(app.fixtureDir, "service.json"),
         format: "json",
-        selectors: ["/ANTHROPIC_API_KEY", "/ANTHROPIC_BASE_URL", "/model"],
+        selectors: ["/SERVICE_API_KEY", "/SERVICE_BASE_URL", "/model"],
       },
     });
 
@@ -113,21 +113,21 @@ describe("ShellBridge command API", () => {
     expect(response.json()).toMatchObject({
       status: "completed",
       fields: [
-        { selector: "/ANTHROPIC_API_KEY", status: "set", redacted: true },
-        { selector: "/ANTHROPIC_BASE_URL", status: "set", value: "https://api.example.test" },
-        { selector: "/model", status: "set", value: "claude-sonnet" },
+        { selector: "/SERVICE_API_KEY", status: "set", redacted: true },
+        { selector: "/SERVICE_BASE_URL", status: "set", value: "https://api.example.test" },
+        { selector: "/model", status: "set", value: "diagnostic-model" },
       ],
     });
     const wire = response.body;
-    expect(wire).toContain("ANTHROPIC_API_KEY");
-    expect(wire).toContain("ANTHROPIC_BASE_URL");
-    expect(wire).toContain("claude-sonnet");
-    expect(wire).not.toContain("sk-ant-api03-secretvalue");
+    expect(wire).toContain("SERVICE_API_KEY");
+    expect(wire).toContain("SERVICE_BASE_URL");
+    expect(wire).toContain("diagnostic-model");
+    expect(wire).not.toContain("test-secret-never-return");
     const db = new Database(databasePath(app), { readonly: true });
     expect(db.prepare("SELECT COUNT(*) AS count FROM proposals").get()).toEqual({ count: 0 });
     db.close();
     const databaseBytes = await (await import("node:fs/promises")).readFile(databasePath(app));
-    expect(databaseBytes.toString("utf8")).not.toContain("sk-ant-api03-secretvalue");
+    expect(databaseBytes.toString("utf8")).not.toContain("test-secret-never-return");
   });
 
   test("lets the sandbox deny a modifying command without creating a proposal", async () => {
@@ -191,7 +191,7 @@ describe("ShellBridge command API", () => {
     expect(outsideRead.statusCode).toBe(400);
     expect(outsideRead.json()).toMatchObject({ error: "cwd_outside_sandbox_roots" });
 
-    const relativeGit = await app.injectCommand({ command: "git status", cwd: "/root/shellbridge" });
+    const relativeGit = await app.injectCommand({ command: "git status", cwd: "/root" });
     expect(relativeGit.statusCode).toBe(400);
     expect(relativeGit.json()).toMatchObject({ error: "cwd_outside_sandbox_roots" });
   });
@@ -232,7 +232,6 @@ describe("ShellBridge command API", () => {
     expect(listed.statusCode).toBe(200);
     expect(listed.body).toContain("run_shell_command");
     expect(listed.body).toContain("inspect_config");
-    expect(listed.body).toContain("inspect_command");
     expect(listed.body).toContain("run_project_task");
     expect(listed.body).toContain("write_text_document");
     expect(listed.body).toContain("patch_text_document");
@@ -249,7 +248,7 @@ describe("ShellBridge command API", () => {
     expect(listed.body).toContain("\"idempotentHint\":true");
     expect(listed.body).toContain("readOnlyHint");
     const tools = listed.json().result.tools as Array<{ name: string; annotations?: { readOnlyHint?: boolean; destructiveHint?: boolean; idempotentHint?: boolean; openWorldHint?: boolean } }>;
-    for (const name of ["run_shell_command", "inspect_config", "inspect_command", "run_project_task", "get_git_status", "prepare_git_commit"]) {
+    for (const name of ["run_shell_command", "inspect_config", "run_project_task", "get_git_status", "prepare_git_commit"]) {
       expect(tools.find((tool) => tool.name === name)?.annotations).toMatchObject({ readOnlyHint: true, openWorldHint: false });
     }
     for (const name of ["write_text_document", "patch_text_document", "move_text_document"]) {
